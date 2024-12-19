@@ -1,6 +1,8 @@
 FROM node:18.3.0 as builder
 ADD package*.json /opt/ui/
 WORKDIR /opt/ui
+# by fxiaoke
+RUN npm config set registry https://registry.npmmirror.com
 RUN npm install
 ADD src /opt/ui/src
 RUN npx parcel build src/index.html

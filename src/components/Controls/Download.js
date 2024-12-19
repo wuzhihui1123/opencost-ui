@@ -37,6 +37,18 @@ const columns = [
     head: "Total",
     prop: "totalCost",
     currency: true,
+  }, {
+    head: "CpuEfficiency",
+    prop: "cpuEfficiency",
+    currency: false,
+  }, {
+    head: "RamEfficiency",
+    prop: "ramEfficiency",
+    currency: false,
+  }, {
+    head: "TotalEfficiency",
+    prop: "totalEfficiency",
+    currency: false,
   }
 ]
 
@@ -46,6 +58,8 @@ const toCSVLine = (datum) => {
   forEach(columns, c => {
     if (c.currency) {
       cols.push(round(get(datum, c.prop, 0.0), 2))
+    } else if (c.head.indexOf('Efficiency') >=0) {
+      cols.push(`${round(get(datum, c.prop, 0.0) * 100, 1)}%`)
     } else {
       cols.push(`"${get(datum, c.prop, "")}"`)
     }

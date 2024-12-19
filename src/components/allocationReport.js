@@ -47,12 +47,12 @@ function stableSort(array, comparator) {
 
 const headCells = [
   { id: "name", numeric: false, label: "Name", width: "auto" },
-  { id: "cpuCost", numeric: true, label: "CPU", width: 90 },
-  { id: "gpuCost", numeric: true, label: "GPU", width: 90 },
-  { id: "ramCost", numeric: true, label: "RAM", width: 90 },
-  { id: "pvCost", numeric: true, label: "PV", width: 90 },
-  { id: "totalEfficiency", numeric: true, label: "Efficiency", width: 90 },
-  { id: "totalCost", numeric: true, label: "Total cost", width: 90 },
+  { id: "cpuCost", numeric: true, label: "CPU Cost", width: 90 },
+  { id: "ramCost", numeric: true, label: "RAM Cost", width: 90 },
+  { id: "cpuEfficiency", numeric: true, label: "CPU Efficiency", width: 130 },
+  { id: "ramEfficiency", numeric: true, label: "RAM Efficiency", width: 130 },
+  { id: "totalCost", numeric: true, label: "Total Cost", width: 90 },
+  { id: "totalEfficiency", numeric: true, label: "Total Efficiency", width: 130 },
 ];
 
 const AllocationReport = ({
@@ -137,76 +137,10 @@ const AllocationReport = ({
             </TableRow>
           </TableHead>
           <TableBody>
-            <TableRow>
-              {headCells.map((cell) => {
-                return (
-                  <TableCell
-                    key={cell.id}
-                    colSpan={cell.colspan}
-                    align={cell.numeric ? "right" : "left"}
-                    style={{ fontWeight: 500 }}
-                  >
-                    {cell.numeric
-                      ? cell.label === "Efficiency"
-                        ? totalData.totalEfficiency == 1.0 &&
-                          totalData.cpuReqCoreHrs == 0 &&
-                          totalData.ramReqByteHrs == 0
-                          ? "Inf%"
-                          : `${round(totalData.totalEfficiency * 100, 1)}%`
-                        : toCurrency(totalData[cell.id], currency)
-                      : totalData[cell.id]}
-                  </TableCell>
-                );
-              })}
-            </TableRow>
             {pageRows.map((row, key) => {
-              if (row.name === "__unmounted__") {
-                row.name = "Unmounted PVs";
-              }
-
-              let isIdle = row.name.indexOf("__idle__") >= 0;
-              let isUnallocated = row.name.indexOf("__unallocated__") >= 0;
-              let isUnmounted = row.name.indexOf("Unmounted PVs") >= 0;
-
-              // Replace "efficiency" with Inf if there is usage w/o request
-              let efficiency = round(row.totalEfficiency * 100, 1);
-              if (
-                row.totalEfficiency == 1.0 &&
-                row.cpuReqCoreHrs == 0 &&
-                row.ramReqByteHrs == 0
-              ) {
-                efficiency = "Inf";
-              }
-
-              // Do not allow drill-down for idle and unallocated rows
-              if (isIdle || isUnallocated || isUnmounted) {
-                return (
-                  <TableRow key={key}>
-                    <TableCell align="left">{row.name}</TableCell>
-                    <TableCell align="right">
-                      {toCurrency(row.cpuCost, currency)}
-                    </TableCell>
-                    <TableCell align="right">
-                      {toCurrency(row.gpuCost, currency)}
-                    </TableCell>
-                    <TableCell align="right">
-                      {toCurrency(row.ramCost, currency)}
-                    </TableCell>
-                    <TableCell align="right">
-                      {toCurrency(row.pvCost, currency)}
-                    </TableCell>
-                    {isIdle ? (
-                      <TableCell align="right">&mdash;</TableCell>
-                    ) : (
-                      <TableCell align="right">{efficiency}%</TableCell>
-                    )}
-                    <TableCell align="right">
-                      {toCurrency(row.totalCost, currency)}
-                    </TableCell>
-                  </TableRow>
-                );
-              }
-
+              let cpuEfficiency = round(row.cpuEfficiency * 100, 1);
+              let ramEfficiency = round(row.ramEfficiency * 100, 1);
+              let totalEfficiency = round(row.totalEfficiency * 100, 1);
               return (
                 <TableRow key={key}>
                   <TableCell align="left">{row.name}</TableCell>
@@ -214,18 +148,15 @@ const AllocationReport = ({
                     {toCurrency(row.cpuCost, currency)}
                   </TableCell>
                   <TableCell align="right">
-                    {toCurrency(row.gpuCost, currency)}
-                  </TableCell>
-                  <TableCell align="right">
                     {toCurrency(row.ramCost, currency)}
                   </TableCell>
-                  <TableCell align="right">
-                    {toCurrency(row.pvCost, currency)}
-                  </TableCell>
-                  <TableCell align="right">{efficiency}%</TableCell>
+                  <TableCell align="right">{cpuEfficiency}%</TableCell>
+                  <TableCell align="right">{ramEfficiency}%</TableCell>
                   <TableCell align="right">
                     {toCurrency(row.totalCost, currency)}
                   </TableCell>
+                  <TableCell align="right">{totalEfficiency}%</TableCell>
+
                 </TableRow>
               );
             })}
@@ -236,7 +167,7 @@ const AllocationReport = ({
         component="div"
         count={numData}
         rowsPerPage={rowsPerPage}
-        rowsPerPageOptions={[10, 25, 50]}
+        rowsPerPageOptions={[10, 25, 50,100,200,500,1000]}
         page={Math.min(page, lastPage)}
         onChangePage={handleChangePage}
         onChangeRowsPerPage={handleChangeRowsPerPage}
